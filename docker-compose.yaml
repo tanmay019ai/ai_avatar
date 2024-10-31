@@ -1,0 +1,54 @@
+version: "3.7"
+
+x-restart-policy: &restart_policy
+  restart: unless-stopped
+
+services:
+
+  backend:
+    <<: *restart_policy
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    environment:
+      - ELEVEN_LABS_API_KEY=sk_xxx
+      - GEMINI_API_KEY=xx
+
+
+    networks:
+        - ai
+
+    expose:
+        - 3000
+
+    ports:
+      - 3000:3000
+
+    volumes:
+      - .:/app
+
+
+  frontend:
+    <<: *restart_policy
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true
+
+
+    networks:
+      - ai
+
+    depends_on:
+      - backend
+
+    volumes:
+      - .:/app
+
+networks:
+    ai:
+        name: ai
+
