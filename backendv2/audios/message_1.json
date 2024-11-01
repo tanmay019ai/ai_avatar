@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "soundFile": "/home/knownblackhat/dev/clg/ai_ml/ai_avatar/backendv2/audios/message_1.wav",
+    "duration": 1.51
+  },
+  "mouthCues": [
+    { "start": 0.00, "end": 0.02, "value": "X" },
+    { "start": 0.02, "end": 0.21, "value": "B" },
+    { "start": 0.21, "end": 0.35, "value": "C" },
+    { "start": 0.35, "end": 0.63, "value": "B" },
+    { "start": 0.63, "end": 0.84, "value": "C" },
+    { "start": 0.84, "end": 0.98, "value": "B" },
+    { "start": 0.98, "end": 1.06, "value": "A" },
+    { "start": 1.06, "end": 1.14, "value": "B" },
+    { "start": 1.14, "end": 1.21, "value": "C" },
+    { "start": 1.21, "end": 1.42, "value": "B" },
+    { "start": 1.42, "end": 1.51, "value": "X" }
+  ]
+}

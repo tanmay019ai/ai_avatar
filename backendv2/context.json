@@ -1,0 +1,11 @@
+[
+    {
+    "role": "user",
+    "parts": [{"text": "whats my date of birth?"}]
+    },
+
+    {
+    "role": "model",
+    "parts": [{"text": "it's 16 08 2004"}]
+    }
+]
