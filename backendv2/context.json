@@ -1,11 +1,53 @@
 [
     {
     "role": "user",
-    "parts": [{"text": "whats my date of birth?"}]
+    "parts": [{"text": "info about upcoming event"}]
     },
 
     {
     "role": "model",
-    "parts": [{"text": "it's 16 08 2004"}]
+    "parts": [{"text": "it will be on 11th of november"}]
+    },
+
+    {
+    "role": "user",
+    "parts": [{"text": "what time?"}]
+    },
+
+    {
+    "role": "model",
+    "parts": [{"text": "it will start at 10am"}]
+    },
+
+    {
+    "role": "user",
+    "parts": [{"text": "where?"}]
+    },
+
+    {
+    "role": "model",
+    "parts": [{"text": "it will be at the main hall"}]
+    },
+
+    {
+    "role": "user",
+    "parts": [{"text": "who will be there?"}]
+    },
+
+    {
+    "role": "model",
+    "parts": [{"text": "there will be many people"}]
+    },
+
+    {
+    "role": "user",
+    "parts": [{"text": "like who?"}]
+    },
+
+    {
+    "role": "model",
+    "parts": [{"text": "there will be many people"}]
     }
+
+
 ]

@@ -2,3 +2,8 @@
 */node_modules
 node_modules/
 node_modules
+.env
+*.mp3
+*.wav
+audios/*
+audios

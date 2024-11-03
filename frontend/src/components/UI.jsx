@@ -1,9 +1,49 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useChat } from "../hooks/useChat";
 
 export const UI = ({ hidden, ...props }) => {
     const input = useRef();
+    const [audioState, setaudioState] = useState("idle");
+    const [audioSR, setaudioSR] = useState();
     const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
+
+    const speechReconCleanup = () => {
+        console.log("cleanup", audioSR)
+        audioSR?.stop();
+        setaudioState("idle")
+        input.current.value ? sendMessage() : null;
+    }
+
+    const speechRecon = () => {
+        console.log("init")
+
+        const recApi = window?.webkitSpeechRecognition || window?.SpeechRecognition;
+
+        recApi ? null : alert("SpeechRecognition won't work for you")
+
+        const rec = new recApi();
+        rec.lang = 'en-US';
+        rec.continuous = true;
+        // rec.interimResults = true;
+
+
+        rec.onresult = (e) => {
+            input.current.value = e.results[0][0].transcript;
+            console.log(`input updated with ${input.current.value}`)
+        }
+
+        // rec.onerror = (e) => {
+        //     alert(`Speech Recognition Failed: ${e.error}`)
+        // }
+
+        rec.start()
+        setaudioState("listen");
+        // audioInputSR.current.value = rec
+        setaudioSR(rec)
+
+
+
+    }
 
     const sendMessage = () => {
         const text = input.current.value;
@@ -93,6 +133,18 @@ export const UI = ({ hidden, ...props }) => {
                             }
                         }}
                     />
+
+                    {audioState === "idle" ?
+                        <button className="bg-pink-500 hover:bg-pink-600 text-white p-4 px-10 font-semibold uppercase rounded-md" onClick={speechRecon}
+                        >
+                            Speak
+                        </button> :
+                        <button className="bg-red-500 hover:bg-red-600 text-white p-4 px-10 font-semibold uppercase rounded-md" onClick={speechReconCleanup}
+                        >
+                            Recording
+                        </button>
+                    }
+
                     <button
                         disabled={loading || message}
                         onClick={sendMessage}
