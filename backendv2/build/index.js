@@ -48,8 +48,7 @@ function gemini_chat(query) {
         You will always reply with a JSON array of messages. With a maximum of 3 messages. and don't quote it with \`\`\`json 
         Each message has a text, facialExpression, and animation property.
         The different facial expressions are: smile, sad, angry, surprised, funnyFace, and default.
-        The different animations are: Talking_0, Talking_1, Talking_2, Crying, Laughing, Rumba, Idle, Terrified, and Angry.
-        Response should be in JSON format.
+        The different animations are: Talking_0, Talking_1, Talking_2,Talking_3, Crying, Laughing, Rumba, Idle, Terrified, and Angry.
         `,
         });
         const jsonctx = yield parse(CONTEXT_FILE);
@@ -90,41 +89,31 @@ const lipSyncMessage = (message) => __awaiter(void 0, void 0, void 0, function* 
     console.log(`Starting conversion for message ${message}`);
     yield execCommand(`ffmpeg -y -i audios/message_${message}.mp3 audios/message_${message}.wav`);
     console.log(`Conversion done in ${new Date().getTime() - time}ms`);
-    yield execCommand(`./bin/rhubarb -f json -o audios/message_${message}.json audios/message_${message}.wav -r phonetic`);
+    yield execCommand(`rhubarb -f json -o audios/message_${message}.json audios/message_${message}.wav -r phonetic`);
     // -r phonetic is faster but less accurate
     console.log(`Lip sync done in ${new Date().getTime() - time}ms`);
 });
-// app.get('/', (_, res) => {
-//   res.send('Hello World!');
-// });
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
 app.post('/chat', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    /*
-      This endpoint returns response like following
-    {
-      text: "text which model will speak",
-      facialExpression: "smile,etc",
-      animation: "animation name",
-      audio: "Base64 file",
-      lipsync: {metadata: {}, mouthCues: []}
-    }
-    */
     const userMessage = req.body.message;
     if (!userMessage) {
         res.send({
             messages: [
                 {
-                    text: 'Hey dear... How was your day?',
+                    text: 'Hello I am a chatbot made for galgotias university by ai-ml club students of tech council',
                     audio: yield audioFileToBase64('audios/intro_0.wav'),
                     lipsync: yield readJsonTranscript('audios/intro_0.json'),
                     facialExpression: 'smile',
                     animation: 'Talking_1',
                 },
                 {
-                    text: "I missed you so much... Please don't go for so long!",
+                    text: "Nice to meet you , i hope you are doing well",
                     audio: yield audioFileToBase64('audios/intro_1.wav'),
                     lipsync: yield readJsonTranscript('audios/intro_1.json'),
-                    facialExpression: 'sad',
-                    animation: 'Crying',
+                    facialExpression: 'smile',
+                    animation: 'Talking_3',
                 },
             ],
         });
@@ -155,6 +144,7 @@ app.post('/chat', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const messages = JSON.parse(gtxt); //  this parsing is done because the ai is instructed to return json
     // here parsing can go wrong an explicit fallback should be backing it
     for (let i = 0; i < messages.length; i++) {
+        console.log(`For loop: ${messages[i]}`);
         const message = messages[i];
         // generate audio file
         const fileName = `audios/message_${i}.mp3`;
@@ -176,5 +166,5 @@ const audioFileToBase64 = (file) => __awaiter(void 0, void 0, void 0, function* 
     return data.toString('base64');
 });
 app.listen(port, () => {
-    console.log(`Backend on port ${port}`);
+    console.log(`Virtual chatbot listening on port ${port}`);
 });
