@@ -4,38 +4,49 @@ x-restart-policy: &restart_policy
   restart: unless-stopped
 
 services:
+  tts:
+    <<: *restart_policy
+    container_name: tts
+
+    build:
+      context: ./tts/.
+      dockerfile: Dockerfile
+
+    ports:
+      - 5002:5002
+
+    networks:
+        - ai
 
   backend:
     <<: *restart_policy
     container_name: backend
     build:
-      context: .
+      context: ./backendv2/.
       dockerfile: Dockerfile
 
     environment:
-      - ELEVEN_LABS_API_KEY=sk_xxx
-      - GEMINI_API_KEY=xx
+      - GEMINI_API_KEY=API_KEY
 
+
+    depends_on:
+      - tts
 
     networks:
         - ai
 
-    expose:
-        - 3000
-
     ports:
       - 3000:3000
-
-    volumes:
-      - .:/app
 
 
   frontend:
     <<: *restart_policy
     container_name: frontend
+
     build:
-      context: .
+      context: ./frontend/.
       dockerfile: Dockerfile
+
     tty: true
 
 
@@ -45,8 +56,10 @@ services:
     depends_on:
       - backend
 
-    volumes:
-      - .:/app
+    ports:
+      - 80:5173
+
+
 
 networks:
     ai:

@@ -1,16 +1,29 @@
-import { exec } from 'child_process';
+import {exec} from 'child_process';
 import cors from 'cors';
 import dotenv from 'dotenv';
 // @ts-ignore
 import voice from 'elevenlabs-node';
 import express from 'express';
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
-import { promises as fs } from 'fs';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import {promises as fs} from 'fs';
+import {GoogleGenerativeAI} from '@google/generative-ai';
 
 const CONTEXT_FILE = 'context.json';
-const voiceID = '9BWtsMINqrJLrRacOk9x';
+// const voiceID = '9BWtsMINqrJLrRacOk9x';
+const voiceID = 'p364';
 dotenv.config();
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.length;
+
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return btoa(binary);
+}
 
 async function parse(file_path: string) {
   const data = await fs.readFile(file_path);
@@ -19,8 +32,6 @@ async function parse(file_path: string) {
 }
 
 async function gemini_chat(query: string): Promise<string> {
-  // This could be streamed, i preffer streaming
-  // TODO: Boundary it with error check as it is js not ts
   if (!process.env.GEMINI_API_KEY) {
     return 'Gemini api key not defined';
   }
@@ -31,7 +42,7 @@ async function gemini_chat(query: string): Promise<string> {
     systemInstruction: `
       You are a chat bot of galgotias university who provides details about an event taking place in our college.
         take recent info from context given. don't include * in text
-        You will always reply with a JSON array of messages. With a maximum of 3 messages. and don't quote it with \`\`\`json 
+        You will always reply with a JSON array of messages. With a maximum of 3 messages. and don't quote it with \`\`\`json
         Each message has a text, facialExpression, and animation property.
         The different facial expressions are: smile, sad, angry, surprised, funnyFace, and default.
         The different animations are: Talking_0, Talking_1, Talking_2, Crying, Laughing, Rumba, Idle, Terrified, and Angry.
@@ -72,19 +83,18 @@ const execCommand = (command: string) => {
   });
 };
 
-const lipSyncMessage = async (message: string) => {
+const lipSyncMessage = async (message: string, url: string) => {
   const time = new Date().getTime();
-  console.log(`Starting conversion for message ${message}`);
+  // await execCommand(
+  //   `ffmpeg -y -i audios/message_${message}.mp3 audios/message_${message}.wav`,
+  //   // -y to overwrite the file
+  // );
+  // console.log(`ffmpeg done in ${new Date().getTime() - time}ms`);
   await execCommand(
-    `ffmpeg -y -i audios/message_${message}.mp3 audios/message_${message}.wav`,
-    // -y to overwrite the file
-  );
-  console.log(`Conversion done in ${new Date().getTime() - time}ms`);
-  await execCommand(
-    `./bin/rhubarb -f json -o audios/message_${message}.json audios/message_${message}.wav -r phonetic`,
+    `curl "${url}" --output audios/message_${message}.wav && ./bin/rhubarb -f json -o audios/message_${message}.json audios/message_${message}.wav -r phonetic`,
   );
   // -r phonetic is faster but less accurate
-  console.log(`Lip sync done in ${new Date().getTime() - time}ms`);
+  console.log(`rhubarb done in ${new Date().getTime() - time}ms`);
 };
 
 // app.get('/', (_, res) => {
@@ -156,21 +166,38 @@ app.post('/chat', async (req, res) => {
   const messages: GeminiResponse[] = JSON.parse(gtxt); //  this parsing is done because the ai is instructed to return json
   // here parsing can go wrong an explicit fallback should be backing it
 
-  for (let i = 0; i < messages.length; i++) {
+  async function genmetadata(i: number) {
     const message = messages[i];
 
     // generate audio file
-    const fileName = `audios/message_${i}.mp3`;
-    const textInput = message.text;
-    await voice.textToSpeech(elevenLabsApiKey, voiceID, fileName, textInput);
+    // const fileName = `audios/message_${i}.mp3`;
+    const url = `http://tts:5002/api/tts?text=${encodeURI(message.text)}&speaker_id=${voiceID}&style_wav=&language_id=`;
+    const res = await fetch(url);
+    // const textInput = message.text;
+    // await voice.textToSpeech(elevenLabsApiKey, voiceID, fileName, textInput);
+    const blob = await res.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const base64String = arrayBufferToBase64(arrayBuffer);
 
     // generate lipsync
-    await lipSyncMessage(i.toString());
-    message.audio = await audioFileToBase64(fileName);
+    await lipSyncMessage(i.toString(), url);
+    // message.audio = await audioFileToBase64(fileName);
+    message.audio = base64String;
     message.lipsync = await readJsonTranscript(`audios/message_${i}.json`);
+    // message.lipsync = null;
   }
 
-  res.send({ messages });
+  const time = new Date().getTime();
+  const task = [];
+  for (let i = 0; i < messages.length; i++) {
+    console.log(`iter ${i}`);
+    // await genmetadata(i);
+    task.push(genmetadata(i));
+  }
+  await Promise.all(task);
+  console.log(`for loop in ${new Date().getTime() - time}ms`);
+
+  res.send({messages});
 });
 
 const readJsonTranscript = async (file: string) => {
