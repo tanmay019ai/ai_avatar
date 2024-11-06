@@ -1,14 +1,14 @@
 {
-  "name": "r3f-virtual-girlfriend-backend",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "Backend for the virtual girlfriend app",
+  "description": "Backend",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js --ext js"
   },
-  "author": "Wawa SENSEI <contact@wawasensei.dev>",
+  "author": "KnownBlackHat <knownblackhat@gmail.com>",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
