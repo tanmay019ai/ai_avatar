@@ -168,7 +168,7 @@ app.post('/chat', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const message = messages[i];
             // generate audio file
             // const fileName = `audios/message_${i}.mp3`;
-            const url = `http://localhost:5002/api/tts?text=${encodeURI(message.text)}&speaker_id=${voiceID}&style_wav=&language_id=`;
+            const url = `http://tts:5002/api/tts?text=${encodeURI(message.text)}&speaker_id=${voiceID}&style_wav=&language_id=`;
             const res = yield fetch(url);
             // const textInput = message.text;
             // await voice.textToSpeech(elevenLabsApiKey, voiceID, fileName, textInput);
