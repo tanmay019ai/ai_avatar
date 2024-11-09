@@ -108,7 +108,7 @@ let setupMode = false;
 
 export function Avatar(props) {
   const { nodes, materials, scene } = useGLTF(
-    "/models/model-transformed.glb"
+    "/models/64f1a714fe61576b46f27ca2.glb"
   );
 
   const { message, onMessagePlayed, chat } = useChat();
@@ -374,5 +374,5 @@ export function Avatar(props) {
   );
 }
 
-useGLTF.preload("/models/model-transformed.glb");
+useGLTF.preload("/models/64f1a714fe61576b46f27ca2.glb");
 useGLTF.preload("/models/animations.glb");
